@@ -4,7 +4,7 @@ import numpy as np
 from scipy.fftpack import fft2, ifft2,ifftshift
 from astropy.convolution import convolve, Box2DKernel
 
-__all__ = ['fivepoint','qfit2','crossD','divergence','fft_differentiation', 'fft_poisson', 'smooth']
+__all__ = ['fivepoint','qfit2','crossD','divergence','vorticity','fft_differentiation', 'fft_poisson', 'smooth']
 __authors__ = ["Jose Ivan Campos Rozo"]
 __email__ = ["hypnus1803@gmail.com"]
 
@@ -194,7 +194,27 @@ def divergence(vx,vy):
 	div = du_x+dv_y
 
 	return div
+def vorticity(vx,vy):
 
+	"""
+		Calculate the vorticity between two 2-D velocity maps v_z = h_m*vort(vx,vy),
+		where $h_m$ is defined as mass-flux scale-heigth (November 1989, ApJ,344,494),
+		and vort(vx,vy) = $\frac{\partial v_y}{\partial x} - \frac{\partial v_x}{\partial y}$
+
+		Parameters
+		----------
+				vx : map of velocities in x direction.
+				vy : map of velocities in y direction.
+		Results
+		-------
+				vz : map of velocities in z direction.
+
+	"""
+	du_y,du_x = np.gradient(vx)
+	dv_y,dv_x = np.gradient(vy)
+	vort = dv_x-du_y
+
+	return vort
 
 def fft_differentiation(image, dx=1.0, dy = None):
 

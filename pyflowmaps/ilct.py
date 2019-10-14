@@ -1,5 +1,5 @@
 import numpy as np
-from math_tools2 import fft_differentiation, fft_poisson, smooth
+from math_tools import fft_differentiation, fft_poisson, smooth
 from collections import namedtuple,OrderedDict
 import sys
 

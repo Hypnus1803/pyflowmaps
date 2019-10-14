@@ -162,11 +162,14 @@ def flowILCT(vels,BField_comp,fwhm_arcsec, scale,interval,threshold=10,
     vx_kps[np.abs(BField_comp[2,:,:]) < threshold] = np.nan
     vy_kps[np.abs(BField_comp[2,:,:]) < threshold] = np.nan
     vz_kps[np.abs(BField_comp[2,:,:]) < threshold] = np.nan
-    
-    #magnitude = np.sqrt(vx_kps**2+vy_kps**2)
-    #vx_kps[magnitude>5.0] = 0.0
-    #vy_kps[[magnitude>5.0] = 0.0
-    #vz_kps[np.abs(vy_kps)>5.0] = 0.0
+
+    vx_kps = vx_kps - np.nanmean(vx_kps)
+    vy_kps = vy_kps - np.nanmean(vy_kps)
+    vz_kps = vz_kps - np.nanmean(vz_kps)
+
+    vx_kps[np.abs(BField_comp[2, :, :]) < threshold] = 0.0
+    vy_kps[np.abs(BField_comp[2, :, :]) < threshold] = 0.0
+    vz_kps[np.abs(BField_comp[2, :, :]) < threshold] = 0.0
 
     structure['vx'] = vx_kps
     structure['vy'] = vy_kps
