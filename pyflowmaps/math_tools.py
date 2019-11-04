@@ -1,5 +1,4 @@
-#!/usr/bin/python
-# -*- coding: utf8 -*-
+
 import numpy as np
 from scipy.fftpack import fft2, ifft2,ifftshift
 from astropy.convolution import convolve, Box2DKernel
@@ -158,13 +157,13 @@ def crossD(cc):
 		c4=cc[1,2,:]+cc[1,0,:]-cc[1,1,:]*2.
 		c2=cc[1,2,:]-cc[1,0,:]
 		c5=cc[2,1,:]+cc[0,1,:]-cc[1,1,:]*2
-		c3=cc[2,1:]-cc[0,1,:]
+		c3=cc[2,1,:]-cc[0,1,:]
 		c6=(cc[2,2,:]-cc[2,0,:]-cc[0,2,:]+cc[0,0,:])/4.
 	elif dim ==4:
 		c4=cc[1,2,:,:]+cc[1,0,:,:]-cc[1,1,:,:]*2.
 		c2=cc[1,2,:,:]-cc[1,0,:,:]
 		c5=cc[2,1,:,:]+cc[0,1,:,:]-cc[1,1,:,:]*2
-		c3=cc[2,1:,:]-cc[0,1,:,:]
+		c3=cc[2,1,:,:]-cc[0,1,:,:]
 		c6=(cc[2,2,:,:]-cc[2,0,:,:]-cc[0,2,:,:]+cc[0,0,:,:])/4.
 	determ=0.5/(c4*c5 - c6*c6)
 	x=determ*(c6*c3 - c5*c2)

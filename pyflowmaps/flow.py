@@ -85,7 +85,7 @@ def flowLCT(mc, fwhm_arcsec, scale, cadence,verbose=False, **kwargs):
     return FlowStructure(**structure)
 
 
-def flowILCT(vels,BField_comp,fwhm_arcsec, scale,interval,threshold=10,
+def flowILCT(vels,BField_comp, scale,interval,threshold=10,
              verbose=False, **kwargs):
     """
     Spanish: Programa para generar los mapas de flujos vectoriales vx, vy, vz en km/s.
@@ -99,8 +99,6 @@ def flowILCT(vels,BField_comp,fwhm_arcsec, scale,interval,threshold=10,
             A `~numpy array` of shape ``(4,ny,nx)`` with B-field components [Gauss]
             whit the time-centered B field (Bx_c,By_c,Bz_c) are stored in BField_comp[0:3,:,:],
             and BField_comp[3,:,:] is the change in Bz such that dBz = Bz_f - Bz_i.
-        fwhm_arcsec :
-            Window size for apodization (arcsec)
         scale :
             Size of pixel (Instument information)
         interval :
@@ -123,13 +121,11 @@ def flowILCT(vels,BField_comp,fwhm_arcsec, scale,interval,threshold=10,
     """
     
     structure = OrderedDict()
-    
-    fwhm = fwhm_arcsec / scale
+
 
     
     kmperasec = 725  # Value of kilometers per arcsec'
     
-    #factor = scale * kmperasec / delta_t
     
     # ************************************************************
     #               Applying ILCT
@@ -159,17 +155,6 @@ def flowILCT(vels,BField_comp,fwhm_arcsec, scale,interval,threshold=10,
     vy_kps = vels['vy'] / 1e5
     vz_kps = vels['vz'] / 1e5
     
-    vx_kps[np.abs(BField_comp[2,:,:]) < threshold] = np.nan
-    vy_kps[np.abs(BField_comp[2,:,:]) < threshold] = np.nan
-    vz_kps[np.abs(BField_comp[2,:,:]) < threshold] = np.nan
-
-    vx_kps = vx_kps - np.nanmean(vx_kps)
-    vy_kps = vy_kps - np.nanmean(vy_kps)
-    vz_kps = vz_kps - np.nanmean(vz_kps)
-
-    vx_kps[np.abs(BField_comp[2, :, :]) < threshold] = 0.0
-    vy_kps[np.abs(BField_comp[2, :, :]) < threshold] = 0.0
-    vz_kps[np.abs(BField_comp[2, :, :]) < threshold] = 0.0
 
     structure['vx'] = vx_kps
     structure['vy'] = vy_kps

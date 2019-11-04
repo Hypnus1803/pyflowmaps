@@ -106,7 +106,7 @@ def pyflowmaker(mc,fwhm,reb=1, lag=1, method='square', interpolation = 'fivepoin
 					cc[j+1,i+1,:,:]=cc[j+1,i+1,:,:]+dumb*dumb
 					dumb = 0
 				else:
-					raise ValueError('Aceptable method keywords are "absolute" | "corr" | "square"; method "square" is the default.')
+					raise ValueError('Acepted method keywords are "absolute" | "corr" | "square"; method "square" is the default.')
 		a = 0
 		b = 0
 
@@ -119,7 +119,7 @@ def pyflowmaker(mc,fwhm,reb=1, lag=1, method='square', interpolation = 'fivepoin
 		for j in range(3):
 			if window == 'boxcar':
 				boxcar = Box2DKernel(fwhm/reb).array
-				cc[j,i,:,:] = correltate(cc[j,i,:,:],boxcar)
+				cc[j,i,:,:] = correlate(cc[j,i,:,:],boxcar)
 			elif window == 'gaussian':
 				kernel = Gaussian1DKernel(stddev=std2).array
 				cc[j,i,:,:] = np.rot90(correlate1d(np.rot90(correlate1d(cc[j,i,:,:],kernel),3),kernel),1)
