@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ![Logo](images/pyflowmaps.jpg)
 Package to infer horizontal velocities, and divergence fields from intensity filtergrams,as well as magnetograms taken from the Sun.
 
@@ -33,7 +34,7 @@ The processing data steps include:
 - Co-aligment of the region of interest (ROI): To obtain the best proper motions of the features in the ROI.
 - p-modes (5-min oscillation) filtering: Those oscillations could add errors or artifact to the flowmaps.
 - Data shape: As it was mentioned, the data must be a cube, with the correct shape (nt,ny,nx).
-If the data is ready, you can go to a python or ipython terminal and try to run it. We will show you the basic command line with the purpose of explain parameters, but if you want a better example, you can find some test data, and a [jupyter](https://jupyter.org/) notebook in the folder *data/*.
+If the data is ready, you can go to a python or ipython terminal and try to run it. We will show you the basic command line with the purpose of explain parameters, but if you want a better example, you can find some test data, and a [jupyter](https://jupyter.org/) notebook in the folder *test/*.
 ```python
 from pyflowmaps.flow import flowLCT
 velocity_field = flowLCT(cube,fwhm_arcsec=3, scale=0.504, cadence=720)
