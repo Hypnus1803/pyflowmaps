@@ -29,7 +29,7 @@ $ python setup.py bdist_wheel
 $ pip install -e .
 ```
 ### How to use it:
-Firstly, we encourage the users to have the data in the final stage of processing data, in the form of a data-cube, that means in the form (nt,ny,nx), where *nt* is the time dimension, or number of images, *ny* is the y-axis dimension, and *nx* is the x-axis dimension of our dataset.
+Firstly, we encourage the users to have the data in the final stage of processing data, in the form of a data-cube, that means in the form (nt,ny,nx), where *nt* is the time dimension, or number of images, *ny* is the y-axis dimension, and *nx* is the x-axis dimension of our dataset. 
 
 The processing data steps include:
 - Co-aligment of the region of interest (ROI): To obtain the best proper motions of the features in the ROI.
@@ -46,7 +46,7 @@ vx = velocity_field.vx
 vy = velocity_field.vy
 vz = velocity_field.vz
 ```
-where *vx* and *vy* are flow-field in the x, and y direction repectively, with shape *(ny,nx)*, and in *km/s* units, whereas the *vz* array is the vertical field given by $v_z = h_m\nabla\cdot v_h(v_x,v_y)$, where $v_h$ are the horizontal velocities which depends on $v_x$ and $v_y$, whereas $h_m=150\,km$ is the mass-flux scale-heigth [(November 1989, ApJ,344,494)](https://ui.adsabs.harvard.edu/abs/1989ApJ...344..494N/abstract). Some authors prefer to show the divergences instead of the $v_z$, so the user just need to divide $v_z/h_m$.
+where <img src="https://render.githubusercontent.com/render/math?math=v_x"> and <img src="https://render.githubusercontent.com/render/math?math=v_y"> are flow-field in the x, and y direction repectively, with shape *(ny,nx)*, and in *km/s* units, whereas the <img src="https://render.githubusercontent.com/render/math?math=v_z"> array is the vertical field given by <img src="https://render.githubusercontent.com/render/math?math=v_z = h_m\nabla\cdot v_h(v_x,v_y)">, where <img src="https://render.githubusercontent.com/render/math?math=v_h"> are the horizontal velocities which depends on <img src="https://render.githubusercontent.com/render/math?math=v_x"> and <img src="https://render.githubusercontent.com/render/math?math=v_y">, whereas <img src="https://render.githubusercontent.com/render/math?math=h_m=150 km"> is the mass-flux scale-heigth [(November 1989, ApJ,344,494)](https://ui.adsabs.harvard.edu/abs/1989ApJ...344..494N/abstract). Some authors prefer to show the divergences instead of the <img src="https://render.githubusercontent.com/render/math?math=v_z">, so the user just need to divide <img src="https://render.githubusercontent.com/render/math?math=v_z/h_m">.
 
 When we plot the outputs of the velocity field, we get the flowfields,
 
