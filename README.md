@@ -1,5 +1,6 @@
-<<<<<<< HEAD
+
 ![Logo](images/pyflowmaps.jpg)
+
 Package to infer horizontal velocities, and divergence fields from intensity filtergrams,as well as magnetograms taken from the Sun.
 
 **pyFlowmaps** is a python package developed using two algorithms named *LCT (Local Correlation Tracking)* and *ILCT (Induction Local Correlation Tracking)*.
