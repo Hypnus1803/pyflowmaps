@@ -4,7 +4,7 @@
 
 #Class flowmaker
 import numpy as np
-from math_tools import fivepoint, qfit2, crossD
+from .math_tools import fivepoint, qfit2, crossD
 from scipy.ndimage import correlate, correlate1d
 from astropy.convolution import Box2DKernel, Gaussian1DKernel
 from collections import namedtuple

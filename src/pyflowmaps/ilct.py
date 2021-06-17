@@ -1,5 +1,5 @@
 import numpy as np
-from math_tools import fft_differentiation, fft_poisson, smooth
+from .math_tools import fft_differentiation, fft_poisson, smooth
 from collections import namedtuple,OrderedDict
 import sys
 
@@ -52,7 +52,7 @@ def pyilct(velocityField,BField_comp,pix_size,interval,psi_opt=False,phi_opt=Fal
 	# ~ d2psi_dydx, d2psi_dy2 = fft_differentiation(dpsi_dy,pix_size)
 	# ~ laplace_psi = d2psi_dx2 + d2psi_dy2
 
-	
+
 	if threshold <= 1.0:
 		nzthr = threshold*np.max(np.abs(Bz))
 	else:

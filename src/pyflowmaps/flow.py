@@ -2,16 +2,16 @@
 # -*- coding: utf8 -*-
 
 import numpy as np
-from flowmaker import pyflowmaker
-from math_tools import divergence
+from .flowmaker import pyflowmaker
+from .math_tools import divergence
 from collections import OrderedDict, namedtuple
-from ilct import pyilct
+from .ilct import pyilct
 
 __all__ = ['flowLCT','flowILCT']
-__authors__ = ["Jose Ivan Campos Rozo, Santiago Vargas Dominguez"]
+__authors__ = ["Jose Iván Campos Rozo, Santiago Vargas Domínguez"]
 __email__ = "hypnus1803@gmail.com"
 
-def flowLCT(mc, fwhm_arcsec, scale, cadence,verbose=False, **kwargs):
+def flowLCT(mc, fwhm_arcsec, scale, cadence, **kwargs):
     """
     Spanish: Programa para generar los mapas de flujos vectoriales vx, vy, vz  en km/s.
     English: Script to generate the vector flow maps vx, vy, vz in km/s.
@@ -44,49 +44,50 @@ def flowLCT(mc, fwhm_arcsec, scale, cadence,verbose=False, **kwargs):
     """
     reb = 1
     structure = OrderedDict()
-    
+
     fwhm = fwhm_arcsec / scale
-    
+
     kmperasec = 725  # Value of kilometers per arcsec'
     h_m = 150  # input('mass-flux scale-heigth (November 1989, ApJ,344,494):')
-    
+
     delta_t = cadence  # time-lag in seconds
     factor = scale * kmperasec / delta_t
     v_limit = 2*reb +reb  # cota maxima velocidad en pixels.
-    
+
     # ************************************************************
     #               Applying LCT
     # ************************************************************
-    
- 
+
+
     HorizontalVelocities = pyflowmaker(mc, fwhm, **kwargs)
     vx = HorizontalVelocities.vx
     vy = HorizontalVelocities.vy
-    
+
     vx = vx.clip(-v_limit, v_limit)
     vy = vy.clip(-v_limit, v_limit)
-    
-    vx_kps = vx * factor  # vx in km/s
-    vy_kps = vy * factor  # vy in km/s
-    
+
+    vx_kps = vx.copy() #* factor  # vx in km/s
+    vy_kps = vy.copy() #* factor  # vy in km/s
+
+    #vx_kps = vx_kps - np.mean(vx_kps)
+    #vy_kps = vy_kps - np.mean(vy_kps)
     vx_kps = vx_kps - np.mean(vx_kps)
     vy_kps = vy_kps - np.mean(vy_kps)
-    
+
     div = divergence(vx_kps, vy_kps)
-    
+
     vz_kps = h_m * div
-    
-    structure['vx'] = vx_kps
-    structure['vy'] = vy_kps
+
+    structure['vx'] = vx_kps*factor
+    structure['vy'] = vy_kps*factor
     structure['vz'] = vz_kps
 
     FlowStructure = namedtuple('FlowStructure', sorted(structure))
-    
+
     return FlowStructure(**structure)
 
 
-def flowILCT(vels,BField_comp,fwhm_arcsec, scale,interval,threshold=10,
-             verbose=False, **kwargs):
+def flowILCT(vels,BField_comp,fwhm_arcsec, scale,interval,threshold=10,**kwargs):
     """
     Spanish: Programa para generar los mapas de flujos vectoriales vx, vy, vz en km/s.
     English: Script to generate the vector flow maps vx, vy, vz  in km/s.
@@ -121,44 +122,44 @@ def flowILCT(vels,BField_comp,fwhm_arcsec, scale,interval,threshold=10,
     -------
         The function returns the velocity maps for vx, vy, and vz in km/s.
     """
-    
+
     structure = OrderedDict()
-    
+
     fwhm = fwhm_arcsec / scale
 
-    
+
     kmperasec = 725  # Value of kilometers per arcsec'
-    
+
     #factor = scale * kmperasec / delta_t
-    
+
     # ************************************************************
     #               Applying ILCT
     # ************************************************************
-    
-    
+
+
     pix_size = kmperasec * scale * (1.e5)
-    
+
     vx_cps = vels[0,:,:] * 1.e5  # vx in cm/s
     vy_cps = vels[1,:,:] * 1.e5  # vy in cm/s
-    
+
     HorizontalField = np.array([vx_cps, vy_cps])
-    
+
     ILCTField = pyilct(HorizontalField, BField_comp, pix_size, interval,
                        threshold=threshold, **kwargs)
-    
+
     vels = OrderedDict()
     optional = OrderedDict()
-    
+
     for i in ILCTField._fields:
         if (i != 'vx') and (i != 'vy') and (i != 'vz'):
             optional[i] = getattr(ILCTField, i)
         else:
             vels[i] = getattr(ILCTField, i)
-    
+
     vx_kps = vels['vx'] / 1e5
     vy_kps = vels['vy'] / 1e5
     vz_kps = vels['vz'] / 1e5
-    
+
     vx_kps[np.abs(BField_comp[2,:,:]) < threshold] = np.nan
     vy_kps[np.abs(BField_comp[2,:,:]) < threshold] = np.nan
     vz_kps[np.abs(BField_comp[2,:,:]) < threshold] = np.nan
@@ -174,10 +175,10 @@ def flowILCT(vels,BField_comp,fwhm_arcsec, scale,interval,threshold=10,
     structure['vx'] = vx_kps
     structure['vy'] = vy_kps
     structure['vz'] = vz_kps
-    
+
     if len(optional) > 0:
         structure['OptionalILCT'] = optional
-    
+
     FlowStructure = namedtuple('FlowStructure', sorted(structure))
-    
+
     return FlowStructure(**structure)
