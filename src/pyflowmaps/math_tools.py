@@ -89,7 +89,7 @@ def qfit2(cc):
 		a4 = -cc[0,0,:,:]+cc[2,2,:,:]
 		a5 = a4-cc[0,1,:,:]-cc[0,2,:,:]+cc[2,0,:,:]+cc[2,1,:,:]
 		a4 = a4+cc[0,2,:,:]-cc[1,0,:,:]+cc[1,2,:,:]-cc[2,0,:,:]
-		a1 = .5*a1-cc[0,1,:,:]-cc[1,1:,:]-cc[2,1,:,:]
+		a1 = .5*a1-cc[0,1,:,:]-cc[1,1,:,:]-cc[2,1,:,:]
 		a2 = .5*a2-cc[1,0,:,:]-cc[1,1,:,:]-cc[1,2,:,:]
 	elif dim == 3:
 		a1 = cc[0,0,:]+cc[0,2,:]+cc[2,0,:]+cc[2,2,:]
@@ -164,7 +164,7 @@ def crossD(cc):
 		c4=cc[1,2,:,:]+cc[1,0,:,:]-cc[1,1,:,:]*2.
 		c2=cc[1,2,:,:]-cc[1,0,:,:]
 		c5=cc[2,1,:,:]+cc[0,1,:,:]-cc[1,1,:,:]*2
-		c3=cc[2,1:,:]-cc[0,1,:,:]
+		c3=cc[2,1,:,:]-cc[0,1,:,:]
 		c6=(cc[2,2,:,:]-cc[2,0,:,:]-cc[0,2,:,:]+cc[0,0,:,:])/4.
 	determ=0.5/(c4*c5 - c6*c6)
 	x=determ*(c6*c3 - c5*c2)
@@ -322,7 +322,7 @@ def fft_poisson(data,dx=1.0,dy=None):
 
 	# Convert back to space domain
 	data_spacedomain_differentiated = ifft2(data_wavenumberdomain_differentiated )
-	
+
 	return (np.real(data_spacedomain_differentiated))*(dx*dy)
 
 def smooth(im2d, w):

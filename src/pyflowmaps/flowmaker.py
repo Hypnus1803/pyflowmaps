@@ -14,7 +14,7 @@ __all__ = ['pyflowmaker']
 __authors__ = ["Jose Ivan Campos Rozo, Santiago Vargas Dominguez"]
 __email__ = "hypnus1803@gmail.com"
 
-method = ['square','absolute','cross']
+method = ['square','absolute','corr']
 interpolation = ['fivepoint','qfit2','crossD']
 window = ['gaussian','boxcar']
 
@@ -119,13 +119,12 @@ def pyflowmaker(mc,fwhm,reb=1, lag=1, method='square', interpolation = 'fivepoin
 		for j in range(3):
 			if window == 'boxcar':
 				boxcar = Box2DKernel(fwhm/reb).array
-				cc[j,i,:,:] = correltate(cc[j,i,:,:],boxcar)
+				cc[j,i,:,:] = correlate(cc[j,i,:,:],boxcar)
 			elif window == 'gaussian':
 				kernel = Gaussian1DKernel(stddev=std2).array
 				cc[j,i,:,:] = np.rot90(correlate1d(np.rot90(correlate1d(cc[j,i,:,:],kernel),3),kernel),1)
 			else:
 				raise ValueError('Aceptable window keywords are "boxcar" | "gaussian"; window "gaussian" is the default.')
-
 
 	if interpolation =='qfit2':
 		vx,vy=qfit2(cc)

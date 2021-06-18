@@ -30,7 +30,7 @@ def flowLCT(mc, fwhm_arcsec, scale, cadence, **kwargs):
 
     kwargs flowmaker :
 	----------------
-	    method : {'square' | 'absolute' | 'cross'}
+	    method : {'square' | 'absolute' | 'corr'}
 	    interpolation : {'fivepoint' | 'qfit2' | 'crossD'}
 	    window : {'gaussian' | 'boxcar'}
 		rebine: the rebinning factor if it is wished.
