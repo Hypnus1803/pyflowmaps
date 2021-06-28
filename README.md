@@ -7,7 +7,7 @@ Package to infer horizontal velocities, and divergence fields from intensity fil
 
 LCT was proposed for the first time by [November and Simon (1988)](https://ui.adsabs.harvard.edu/abs/1988ApJ...333..427N/abstract), and it has been used widely in solar physicis for the calculation of proper motions on solar surface of consecutive frames in a time series of intensity maps.
 
-ILCT was proposed firstly by [Welsch, B. T., et al. (2004)](https://ui.adsabs.harvard.edu/abs/2004ApJ...610.1148W/abstract), and it is a combination algorithm between LCT, but including induction equation to obtain the velocity flow field in magnetized regions on the solar surface.
+ILCT was proposed firstly by [Welsch, B. T., et al. (2004)](https://ui.adsabs.harvard.edu/abs/2004ApJ...610.1148W/abstract), and it is a combination algorithm between LCT or FLCT (Fourier Local Correlation Tracking [G. H. Fisher and B. T. Welsch (2008)](https://ui.adsabs.harvard.edu/abs/2008ASPC..383..373F/abstract)), but including induction equation to obtain the velocity flow field in magnetized regions on the solar surface.
 
 These two algorithms are based on IDL scripts, but they have changed through time since we started the project.
 
