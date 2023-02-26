@@ -138,7 +138,7 @@ def pyflowmaker(mc,fwhm,reb=1, lag=1, method='square', interpolation = 'fivepoin
 	vx = 2.*shf*vx
 	vy = 2.*shf*vy
 
-	vx = resample(vx,(yy,xx),center=True,method='neighbor',minusone=False)*reb
-	vy = resample(vy,(yy,xx),center=True,method='neighbor',minusone=False)*reb
+	vx = resample(vx,(yy,xx),center=True,method='nearest',minusone=False)*reb
+	vy = resample(vy,(yy,xx),center=True,method='nearest',minusone=False)*reb
 
 	return VelocityPair(vx,vy)
