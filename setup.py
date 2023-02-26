@@ -8,7 +8,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name='pyflowmaps',
-    version="0.0.1",
+    version="0.0.2",
     author=["Jose Ivan Campos Rozo",'Santiago Vargas Dominguez'],
     author_email="hypnus1803@gmail.com",
     description='Package to infer horizontal proper motions',
@@ -22,8 +22,8 @@ setup(
     ],
     package_dir={"": "src"},
     packages=find_packages(),#where="/Users/joseivan/opt/anaconda3/lib/python3.7/site-packages/pyflowmaps"),
-    python_requires=">=3.6",
+    python_requires=">=3.7",
     install_requires=[
-    'numpy >= 1.19','scipy >= 1.5','astropy >= 4.2','sunpy >= 2.0'
+    'numpy >= 1.19','scipy >= 1.5','astropy >= 4.2','sunpy >= 3.0'
     ],
     )

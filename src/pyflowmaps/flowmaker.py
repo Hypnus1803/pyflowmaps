@@ -87,8 +87,8 @@ def pyflowmaker(mc,fwhm,reb=1, lag=1, method='square', interpolation = 'fivepoin
 
 
 	for k in range(n):
-		map_a = resample(mc[k,:,:],(yy_r,xx_r),method='neighbor',minusone=False)
-		map_b = resample(mc[k+lag],(yy_r,xx_r),method='neighbor',minusone=False)
+		map_a = resample(mc[k,:,:],(yy_r,xx_r),method='nearest',minusone=False)
+		map_b = resample(mc[k+lag],(yy_r,xx_r),method='nearest',minusone=False)
 		map_a = map_a - np.sum(map_a)/n_p
 		map_b = map_b - np.sum(map_b )/n_p
 
