@@ -244,6 +244,7 @@ def fft_differentiation(image, dx=1.0, dy = None):
 				https://stackoverflow.com/questions/29189885/finding-the-derivative-of-a-2d-function-using-fft-properties
 	"""
 
+
 	if dy is None:
 		dy = dx
 
@@ -255,7 +256,11 @@ def fft_differentiation(image, dx=1.0, dy = None):
 	kx = kx[:-1]
 	ky = ky[:-1]
 
+	if np.any(np.isnan(image)):
+		image = np.nan_to_num(image)
+
 	data_wavenumberdomain = fft2(image)
+
 
 	# Compute grid of wavenumbers
 	KX, KY = np.meshgrid(ifftshift(kx),ifftshift(ky))
@@ -308,6 +313,9 @@ def fft_poisson(data,dx=1.0,dy=None):
 	kx = kx[:-1]
 	ky = ky[:-1]
 
+	if np.any(np.isnan(data)):
+		data = np.nan_to_num(data)
+
 	data_wavenumberdomain = np.ma.array(fft2(data))
 	data_wavenumberdomain[0,0] = np.ma.masked
 
@@ -337,7 +345,7 @@ def smooth(im2d, w):
 	max_y = int(ny - (w+1)/2)
 
 	kernel = Box2DKernel(w)
-	smooth_0 = convolve(im2d,kernel)
+	smooth_0 = convolve(im2d,kernel,normalize_kernel=False, preserve_nan=True, nan_treatment='fill')
 	smooth_f = im2d.copy()
 	smooth_f[min:max_y+1,min:max_x+1] = smooth_0[min:max_y+1,min:max_x+1]
 

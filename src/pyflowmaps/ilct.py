@@ -54,7 +54,7 @@ def pyilct(velocityField,BField_comp,pix_size,interval,psi_opt=False,phi_opt=Fal
 
 
 	if threshold <= 1.0:
-		nzthr = threshold*np.max(np.abs(Bz))
+		nzthr = threshold*np.nanmax(np.abs(Bz))
 	else:
 		nzthr = threshold
 
@@ -69,7 +69,7 @@ def pyilct(velocityField,BField_comp,pix_size,interval,psi_opt=False,phi_opt=Fal
 
 
 	if n_zeros != 0:
-		Bzmiss = 1e10*np.max(np.abs(Bz))
+		Bzmiss = 1e10*np.nanmax(np.abs(Bz))
 		Bz[zeros] = Bzmiss
 		print('Some zeros present, ILCT are ajusting them...')
 	else:

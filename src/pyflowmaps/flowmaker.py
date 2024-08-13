@@ -87,10 +87,14 @@ def pyflowmaker(mc,fwhm,reb=1, lag=1, method='square', interpolation = 'fivepoin
 
 
 	for k in range(n):
-		map_a = resample(mc[k,:,:],(yy_r,xx_r),method='nearest',minusone=False)
-		map_b = resample(mc[k+lag],(yy_r,xx_r),method='nearest',minusone=False)
-		map_a = map_a - np.sum(map_a)/n_p
-		map_b = map_b - np.sum(map_b )/n_p
+		if reb != 1:
+			map_a = resample(mc[k,:,:],(yy_r,xx_r),method='nearest',minusone=False)
+			map_b = resample(mc[k+lag],(yy_r,xx_r),method='nearest',minusone=False)
+		else:
+			map_a = mc[k,:,:]
+			map_b = mc[k+lag,:,:]
+		map_a = map_a - np.nansum(map_a)/n_p
+		map_b = map_b - np.nansum(map_b )/n_p
 
 		for i in range(-1,2):
 			for j in range(-1,2):
@@ -138,7 +142,11 @@ def pyflowmaker(mc,fwhm,reb=1, lag=1, method='square', interpolation = 'fivepoin
 	vx = 2.*shf*vx
 	vy = 2.*shf*vy
 
-	vx = resample(vx,(yy,xx),center=True,method='nearest',minusone=False)*reb
-	vy = resample(vy,(yy,xx),center=True,method='nearest',minusone=False)*reb
+	if reb != 1:
+		vx = resample(vx,(yy,xx),center=True,method='nearest',minusone=False)*reb
+		vy = resample(vy,(yy,xx),center=True,method='nearest',minusone=False)*reb
+
+	vx = vx*reb
+	vy = vy*reb
 
 	return VelocityPair(vx,vy)

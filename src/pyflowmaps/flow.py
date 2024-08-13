@@ -71,8 +71,8 @@ def flowLCT(mc, fwhm_arcsec, scale, cadence, **kwargs):
 
     #vx_kps = vx_kps - np.mean(vx_kps)
     #vy_kps = vy_kps - np.mean(vy_kps)
-    vx_kps = vx_kps - np.mean(vx_kps)
-    vy_kps = vy_kps - np.mean(vy_kps)
+    vx_kps = vx_kps 
+    vy_kps = vy_kps 
 
     div = divergence(vx_kps, vy_kps)
 
