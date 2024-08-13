@@ -7,13 +7,13 @@ import sys
 
 
 def pyilct(velocityField,BField_comp,pix_size,interval,psi_opt=False,phi_opt=False,
-		   threshold=100.0,check=False, mask=False):
+		   threshold=10.0,check=False, mask=False):
 
 	vel = velocityField.copy()
 	mag = BField_comp.copy()
 
 	structure = OrderedDict()
-	ny, nx, n = mag.shape
+	#ny, nx, n = mag.shape
 
 	u = vel[0,:,:]
 	v = vel[1,:,:]
@@ -62,14 +62,14 @@ def pyilct(velocityField,BField_comp,pix_size,interval,psi_opt=False,phi_opt=Fal
 	n_hiBz = len(hiBz[0])
 
 	loBz = np.where(np.abs(Bz) <= nzthr)
-	n_loBz = len(loBz[0])
+	#n_loBz = len(loBz[0])
 
 	zeros = np.where(np.abs(Bz) < 1e-4)
 	n_zeros = len(zeros[0])
 
 
 	if n_zeros != 0:
-		Bzmiss = 1e10*np.nanmax(np.abs(Bz))
+		Bzmiss = np.nan #1e10*np.nanmax(np.abs(Bz))
 		Bz[zeros] = Bzmiss
 		print('Some zeros present, ILCT are ajusting them...')
 	else:
