@@ -7,7 +7,7 @@ import sys
 
 
 def pyilct(velocityField,BField_comp,pix_size,interval,psi_opt=False,phi_opt=False,
-		   threshold=10.0,check=False, mask=False):
+		   threshold=10.0,check=False, mask=False,verbose=False):
 
 	vel = velocityField.copy()
 	mag = BField_comp.copy()
@@ -71,9 +71,11 @@ def pyilct(velocityField,BField_comp,pix_size,interval,psi_opt=False,phi_opt=Fal
 	if n_zeros != 0:
 		Bzmiss = np.nan #1e10*np.nanmax(np.abs(Bz))
 		Bz[zeros] = Bzmiss
-		print('Some zeros present, ILCT are ajusting them...')
+		if verbose:
+			print('Some zeros present, ILCT are ajusting them...')
 	else:
-		print('No zeros present in the calculations')
+		if verbose:
+			print('No zeros present in the calculations')
 
 	# ~ vx = np.zeros([ny,nx],dtype=np.float64)*u.cm/u.s
 	# ~ vy = np.zeros([ny,nx],dtype=np.float64)*u.cm/u.s
