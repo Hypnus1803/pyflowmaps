@@ -1,7 +1,7 @@
 import numpy as np
 from .math_tools import fft_differentiation, fft_poisson, smooth
 from collections import namedtuple,OrderedDict
-import sys
+
 
 
 
@@ -13,7 +13,6 @@ def pyilct(velocityField,BField_comp,pix_size,interval,psi_opt=False,phi_opt=Fal
 	mag = BField_comp.copy()
 
 	structure = OrderedDict()
-	#ny, nx, n = mag.shape
 
 	u = vel[0,:,:]
 	v = vel[1,:,:]
@@ -32,9 +31,6 @@ def pyilct(velocityField,BField_comp,pix_size,interval,psi_opt=False,phi_opt=Fal
 
 	dphi_dx, dphi_dy = fft_differentiation(phi,pix_size)
 
-	# ~ d2phi_dx2,dphi_dxdy = fft_differentiation(dphi_dx,pix_size.value)
-	# ~ d2phi_dydx, d2phi_dy2 = fft_differentiation(dphi_dy,pix_size)
-	# ~ laplace_phi = d2phi_dx2 + d2phi_dy2
 
 	uxBz = u*Bz
 	uyBz = v*Bz
@@ -48,10 +44,6 @@ def pyilct(velocityField,BField_comp,pix_size,interval,psi_opt=False,phi_opt=Fal
 
 	dpsi_dx, dpsi_dy = fft_differentiation(psi, pix_size)
 
-	# ~ d2psi_dx2,dpsi_dxdy = fft_differentiation(dpsi_dx,pix_size.value)
-	# ~ d2psi_dydx, d2psi_dy2 = fft_differentiation(dpsi_dy,pix_size)
-	# ~ laplace_psi = d2psi_dx2 + d2psi_dy2
-
 
 	if threshold <= 1.0:
 		nzthr = threshold*np.nanmax(np.abs(Bz))
@@ -62,24 +54,19 @@ def pyilct(velocityField,BField_comp,pix_size,interval,psi_opt=False,phi_opt=Fal
 	n_hiBz = len(hiBz[0])
 
 	loBz = np.where(np.abs(Bz) <= nzthr)
-	#n_loBz = len(loBz[0])
 
 	zeros = np.where(np.abs(Bz) < 1e-4)
 	n_zeros = len(zeros[0])
 
 
 	if n_zeros != 0:
-		Bzmiss = np.nan #1e10*np.nanmax(np.abs(Bz))
-		Bz[zeros] = Bzmiss
+		Bz[zeros] = np.nan 
 		if verbose:
 			print('Some zeros present, ILCT are ajusting them...')
 	else:
 		if verbose:
 			print('No zeros present in the calculations')
 
-	# ~ vx = np.zeros([ny,nx],dtype=np.float64)*u.cm/u.s
-	# ~ vy = np.zeros([ny,nx],dtype=np.float64)*u.cm/u.s
-	# ~ vz = np.zeros([ny,nx],dtype=np.float64)*u.cm/u.s
 
 	Fx = -dphi_dx + dpsi_dy
 	Fy = -dphi_dy - dpsi_dx
@@ -142,11 +129,7 @@ def pyilct(velocityField,BField_comp,pix_size,interval,psi_opt=False,phi_opt=Fal
 		vy[loBz] = 0.0
 		vz[loBz] = 0.0
 
-	# ~ vel = np.zeros([3,ny,nx],dtype=np.float64)
-	# ~ vel[0,:,:] = vx[:,:]
-	# ~ vel[1,:,:] = vy[:,:]
-	# ~ vel[2,:,:] = vz[:,:]
-
+		
 	structure['vx'] = vx
 	structure['vy'] = vy
 	structure['vz'] = vz

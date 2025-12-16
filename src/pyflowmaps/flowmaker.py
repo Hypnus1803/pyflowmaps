@@ -8,7 +8,33 @@ from .math_tools import fivepoint, qfit2, crossD
 from scipy.ndimage import correlate, correlate1d
 from astropy.convolution import Box2DKernel, Gaussian1DKernel
 from collections import namedtuple
-from sunpy.image.resample import resample
+try:
+	from sunpy.image.resample import resample as _sunpy_resample
+	_HAS_SUNPY = True
+except Exception:
+	_HAS_SUNPY = False
+
+def _resample(image, new_shape, method='nearest', center=None, minusone=None):
+	"""Resize 2D array to new_shape using SunPy when available, else SciPy.
+
+	Parameters
+	----------
+	image : 2D array
+		Input image.
+	new_shape : tuple(int, int)
+		Target shape (ny, nx).
+	method : {'nearest', 'linear'}
+		Interpolation method. 'nearest' maps to order=0 in SciPy fallback.
+	center, minusone : any
+		Accepted for compatibility; ignored in SciPy fallback.
+	"""
+	if _HAS_SUNPY:
+		return _sunpy_resample(image, new_shape, method=method, minusone=(False if minusone is None else minusone))
+	else:
+		from scipy.ndimage import zoom
+		zoom_factors = (new_shape[0] / image.shape[0], new_shape[1] / image.shape[1])
+		order = 0 if method == 'nearest' else 1
+		return zoom(image, zoom_factors, order=order)
 
 __all__ = ['pyflowmaker']
 __authors__ = ["Jose Ivan Campos Rozo, Santiago Vargas Dominguez"]
@@ -38,7 +64,7 @@ def pyflowmaker(mc,fwhm,reb=1, lag=1, method='square', interpolation = 'fivepoin
 	    time-lag between 'references' and 'life' subseries. Default 1.
 	reb :
 	    rebinning factor to change scale/range of November's method. Default 1
-	method : {'square' | 'absolute' | 'cross'}
+	method : {'square' | 'absolute' | 'corr'}
 	      Methods to calculate local diferences.
 		   * square - Sum of squares of the local differences.
 		   * absolute - Apply an absolute differences algorithm.
@@ -67,6 +93,15 @@ def pyflowmaker(mc,fwhm,reb=1, lag=1, method='square', interpolation = 'fivepoin
 
 	"""
 
+	# Normalize and validate parameters
+
+	if method not in ('square', 'absolute', 'corr'):
+		raise ValueError('Acceptable method keywords are "absolute" | "corr" | "square"; method "square" is the default.')
+	if interpolation not in ('fivepoint', 'qfit2', 'crossD'):
+		raise ValueError('Acceptable mode keywords are "fivepoint" | "qfit2" | "crossD"; mode "fivepoint" is the default.')
+	if window not in ('gaussian', 'boxcar'):
+		raise ValueError('Acceptable window keywords are "boxcar" | "gaussian"; window "gaussian" is the default.')
+
 	shf=1
 	std1=fwhm/(2*np.sqrt(2*np.log(2)))
 	std2=std1/reb
@@ -88,8 +123,8 @@ def pyflowmaker(mc,fwhm,reb=1, lag=1, method='square', interpolation = 'fivepoin
 
 	for k in range(n):
 		if reb != 1:
-			map_a = resample(mc[k,:,:],(yy_r,xx_r),method='nearest',minusone=False)
-			map_b = resample(mc[k+lag],(yy_r,xx_r),method='nearest',minusone=False)
+			map_a = _resample(mc[k,:,:], (yy_r, xx_r), method='nearest', minusone=False)
+			map_b = _resample(mc[k+lag], (yy_r, xx_r), method='nearest', minusone=False)
 		else:
 			map_a = mc[k,:,:]
 			map_b = mc[k+lag,:,:]
@@ -108,15 +143,17 @@ def pyflowmaker(mc,fwhm,reb=1, lag=1, method='square', interpolation = 'fivepoin
 				elif method == 'square':
 					dumb = np.roll(map_a,(i*shf,j*shf),axis=(1,0)) - np.roll(map_b,(-i*shf,-j*shf),axis=(1,0))
 					cc[j+1,i+1,:,:]=cc[j+1,i+1,:,:]+dumb*dumb
-					dumb = 0
+					del dumb
 				else:
 					raise ValueError('Aceptable method keywords are "absolute" | "corr" | "square"; method "square" is the default.')
-		a = 0
-		b = 0
+		del map_a, map_b
 
+	#X boundaries
 	cc[:,:,:,0]=cc[:,:,:,1]
-	cc[:,:,0,:]=cc[:,:,1,:]
 	cc[:,:,:,xx_r-1]=cc[:,:,:,xx_r-2]
+	
+	#Y boundaries
+	cc[:,:,0,:]=cc[:,:,1,:]
 	cc[:,:,yy_r-1,:]=cc[:,:,yy_r-2,:]
 
 	for i in range(3):
@@ -128,7 +165,7 @@ def pyflowmaker(mc,fwhm,reb=1, lag=1, method='square', interpolation = 'fivepoin
 				kernel = Gaussian1DKernel(stddev=std2).array
 				cc[j,i,:,:] = np.rot90(correlate1d(np.rot90(correlate1d(cc[j,i,:,:],kernel),3),kernel),1)
 			else:
-				raise ValueError('Aceptable window keywords are "boxcar" | "gaussian"; window "gaussian" is the default.')
+				raise ValueError('Acceptable window keywords are "boxcar" | "gaussian"; window "gaussian" is the default.')
 
 	if interpolation =='qfit2':
 		vx,vy=qfit2(cc)
@@ -137,14 +174,14 @@ def pyflowmaker(mc,fwhm,reb=1, lag=1, method='square', interpolation = 'fivepoin
 	elif interpolation == 'fivepoint':
 		vx,vy=fivepoint(cc)
 	else:
-		raise ValueError('Aceptable mode keywords are "fivepoint" | "qfit2" | "crossD"; mode "fivepoint" is the default.')
+		raise ValueError('Acceptable mode keywords are "fivepoint" | "qfit2" | "crossD"; mode "fivepoint" is the default.')
 
 	vx = 2.*shf*vx
 	vy = 2.*shf*vy
 
 	if reb != 1:
-		vx = resample(vx,(yy,xx),center=True,method='nearest',minusone=False)*reb
-		vy = resample(vy,(yy,xx),center=True,method='nearest',minusone=False)*reb
+		vx = _resample(vx, (yy, xx), method='nearest')*reb
+		vy = _resample(vy, (yy, xx), method='nearest')*reb
 
 	vx = vx*reb
 	vy = vy*reb
