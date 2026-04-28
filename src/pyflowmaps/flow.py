@@ -41,6 +41,12 @@ def flowLCT(mc, fwhm_arcsec, scale, cadence, reb=1,**kwargs):
 	    window : {'gaussian' | 'boxcar'}
 		rebine: the rebinning factor if it is wished.
 		lag: he lag between the images to be compared (number of images)
+		mu : float, optional
+		    Cosine of the heliocentric angle (0 < mu <= 1). When mu < 1 the
+		    Gaussian window becomes elliptical to compensate for foreshortening.
+		theta : float, optional
+		    Position angle (radians, counterclockwise from +x) of the radial
+		    direction. Used only when mu < 1.
 
     Output
     -------

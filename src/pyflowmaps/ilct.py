@@ -1,3 +1,4 @@
+import warnings
 import numpy as np
 from .math_tools import fft_differentiation, fft_poisson, smooth
 from collections import namedtuple,OrderedDict
@@ -8,6 +9,25 @@ from collections import namedtuple,OrderedDict
 
 def pyilct(velocityField,BField_comp,pix_size,interval,psi_opt=False,phi_opt=False,
 		   threshold=10.0,check=False, mask=False,verbose=False):
+
+	velocityField = np.asarray(velocityField, dtype=float)
+	BField_comp = np.asarray(BField_comp, dtype=float)
+
+	if velocityField.ndim != 3 or velocityField.shape[0] != 2:
+		raise ValueError('velocityField must have shape (2, ny, nx), got {}'.format(velocityField.shape))
+	if BField_comp.ndim != 3 or BField_comp.shape[0] != 4:
+		raise ValueError('BField_comp must have shape (4, ny, nx), got {}'.format(BField_comp.shape))
+	if velocityField.shape[1:] != BField_comp.shape[1:]:
+		raise ValueError('Spatial dimensions of velocityField {} and BField_comp {} must match.'.format(
+			velocityField.shape[1:], BField_comp.shape[1:]))
+
+	if pix_size <= 0:
+		raise ValueError('pix_size must be positive, got {}'.format(pix_size))
+	if interval == 0:
+		raise ValueError('interval must be non-zero, got {}'.format(interval))
+
+	if threshold < 0:
+		raise ValueError('threshold must be non-negative, got {}'.format(threshold))
 
 	vel = velocityField.copy()
 	mag = BField_comp.copy()
@@ -73,13 +93,18 @@ def pyilct(velocityField,BField_comp,pix_size,interval,psi_opt=False,phi_opt=Fal
 
 	magb2 = Bx**2 + By**2 + Bz**2
 
+	# Guard against division by zero in magb2 and Bz
+	magb2_safe = magb2.copy()
+	magb2_safe[magb2_safe == 0] = np.nan
 
 	if n_hiBz == 0:
 		raise ValueError('ILCT message: There is not magnetic data above the threshold limit = {0}. Stopping the code...'.format(threshold))
 	else:
-		vz = -(Bx*Fx + By*Fy)/magb2
-		vx = (Fx + Bx*vz)/Bz
-		vy = (Fy + By*vz)/Bz
+		with warnings.catch_warnings():
+			warnings.simplefilter('ignore', RuntimeWarning)
+			vz = -(Bx*Fx + By*Fy)/magb2_safe
+			vx = (Fx + Bx*vz)/Bz
+			vy = (Fy + By*vz)/Bz
 
 
 

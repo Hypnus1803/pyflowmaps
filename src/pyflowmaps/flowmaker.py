@@ -6,7 +6,7 @@
 import numpy as np
 from .math_tools import fivepoint, qfit2, crossD
 from scipy.ndimage import correlate, correlate1d
-from astropy.convolution import Box2DKernel, Gaussian1DKernel
+from astropy.convolution import Box2DKernel, Gaussian1DKernel, Gaussian2DKernel
 from collections import namedtuple
 try:
 	from sunpy.image.resample import resample as _sunpy_resample
@@ -101,6 +101,7 @@ def pyflowmaker(mc,fwhm,reb=1, lag=1, method='square', interpolation = 'fivepoin
 		raise ValueError('Acceptable mode keywords are "fivepoint" | "qfit2" | "crossD"; mode "fivepoint" is the default.')
 	if window not in ('gaussian', 'boxcar'):
 		raise ValueError('Acceptable window keywords are "boxcar" | "gaussian"; window "gaussian" is the default.')
+
 
 	shf=1
 	std1=fwhm/(2*np.sqrt(2*np.log(2)))
