@@ -197,7 +197,7 @@ def flowILCT(vels,BField_comp,fwhm_arcsec, scale,interval,threshold=10,**kwargs)
 
 def flowDAVE(bx_init, by_init, bz_init,
              bx_final, by_final, bz_final,
-             pixel_size_arcsec, date, delta_time, window_arcsec, **kwargs):
+             pixel_size_arcsec, date, delta_time, window_arcsec):
     """
     Spanish: Genera mapas de flujos horizontales/verticales usando DAVE4VM.
     English: Generate vx, vy, vz in km/s using DAVE4VM between two vector magnetograms.
@@ -211,7 +211,7 @@ def flowDAVE(bx_init, by_init, bz_init,
         pixel_size_arcsec :
             Pixel size in arcseconds.
         date :
-            Time string (e.g., '2013-06-13') used for Sun–Earth distance if available.
+            Time string (e.g., '2013-06-13') used for Sun-Earth distance if available.
         delta_time :
             Time between final and initial images (seconds).
         window_arcsec :
@@ -223,7 +223,7 @@ def flowDAVE(bx_init, by_init, bz_init,
 
         Notes
         -----
-        - Pixel scale (km/pixel) is computed via Sun–Earth distance if SunPy is available; otherwise,
+        - Pixel scale (km/pixel) is computed via Sun-Earth distance if SunPy is available; otherwise,
             a constant scale `KM_PER_ARCSEC * pixel_size_arcsec` is used.
         - Output velocities are in km/s; optional derivative fields (UX,VX,WX,UY,VY,WY) are local coefficients.
     """
@@ -237,7 +237,7 @@ def flowDAVE(bx_init, by_init, bz_init,
         pixel_size_km = KM_PER_ARCSEC * pixel_size_arcsec
 
     dx = pixel_size_km
-    dy = pixel_size_km
+    dy = pixel_size_km.math
 
     window_size = int(window_arcsec / pixel_size_arcsec)
     if window_size % 2 == 0:
