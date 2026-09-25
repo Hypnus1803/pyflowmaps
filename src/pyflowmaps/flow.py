@@ -78,13 +78,16 @@ def flowLCT(mc, fwhm_arcsec, scale, cadence, reb=1,**kwargs):
     vx_kps = vx_kps - np.mean(vx_kps)
     vy_kps = vy_kps - np.mean(vy_kps)
 
+    vx_kps = vx_kps * factor
+    vy_kps = vy_kps * factor
+
 
     div = divergence(vx_kps, vy_kps)
 
     vz_kps = h_m * div
 
-    structure['vx'] = vx_kps*factor
-    structure['vy'] = vy_kps*factor
+    structure['vx'] = vx_kps
+    structure['vy'] = vy_kps
     structure['vz'] = vz_kps
 
     FlowStructure = namedtuple('FlowStructure', sorted(structure))
