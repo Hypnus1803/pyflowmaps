@@ -2,11 +2,12 @@
 # -*- coding: utf8 -*-
 import numpy as np
 from scipy.fft import fft2, ifft2,ifftshift
-from astropy.convolution import convolve, Box2DKernel
+from astropy.convolution import Box2DKernel
 from scipy.ndimage import gaussian_filter
+from scipy.signal import convolve
 
 __all__ = ['fivepoint','qfit2','crossD','divergence','vorticity','fft_differentiation', 'fft_poisson', 'smooth',
-		   'odiff','the_matrix','pointingflux','neutralline','v_perp']
+		   'odiff','the_matrix','pointingflux','neutralline','v_perp','fft_convolve2d']
 __authors__ = ["Jose Ivan Campos Rozo"]
 __email__ = ["hypnus1803@gmail.com"]
 
@@ -385,59 +386,66 @@ def the_matrix(bx, bxx, bxy, by, byx, byy, bz, bzx, bzy,
 	"""
 	# Precompute products
 	bz2 = bz * bz
+
 	GGx = bz * bzx
 	GGy = bz * bzy
-	GGxx = bzx * bzx
 	GGt = bzt * bz
 
+	GGxx = bzx * bzx
 	GGyy = bzy * bzy
 	GGxy = bzx * bzy
+
 	GGtx = bzt * bzx
 	GGty = bzt * bzy
 	GGtt = bzt * bzt
 
 	# Convolutions
-	G   = convolve(bz2, psf, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')
-	Gx  = convolve(GGx, psf, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')
-	xGx = convolve(GGx, psfx, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')
-	yGx = convolve(GGx, psfy, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')
+	G   = convolve(bz2,psf,mode='same') #convolve(bz2, psf, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')
+	
+	Gx  = convolve(GGx, psf, mode='same')
+	xGx = convolve(GGx, psfx, mode='same')
+	yGx = convolve(GGx, psfy, mode='same')
 
-	Gy  = convolve(GGy, psf, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')
-	xGy = convolve(GGy, psfx, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')
-	yGy = convolve(GGy, psfy, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')
-	Ht  = convolve(GGt, psf, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')
+	Gy  = convolve(GGy, psf, mode='same')
+	xGy = convolve(GGy, psfx, mode='same')
+	yGy = convolve(GGy, psfy, mode='same')
+	
+	Ht  = convolve(GGt, psf, mode='same')
 
-	Gxx = convolve(GGxx, psf, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')
-	Gyy = convolve(GGyy, psf, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')
-	Gxy = convolve(GGxy, psf, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')
-	Gtx = convolve(GGtx, psf, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')
+	Gxx = convolve(GGxx, psf, mode='same')
+	Gyy = convolve(GGyy, psf, mode='same')
+	Gxy = convolve(GGxy, psf, mode='same')
+	
+	Gtx = convolve(GGtx, psf, mode='same')
+	Gty = convolve(GGty, psf, mode='same')
 
-	Gty = convolve(GGty, psf, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')
-	xGxx = convolve(GGxx, psfx, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')
-	xGyy = convolve(GGyy, psfx, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')
-	xGxy = convolve(GGxy, psfx, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')
+	xGxx = convolve(GGxx, psfx, mode='same')
+	xGyy = convolve(GGyy, psfx, mode='same')
+	xGxy = convolve(GGxy, psfx, mode='same')
 
-	xGtx = convolve(GGtx, psfx, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')
-	xGty = convolve(GGty, psfx, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')
-	yGxx = convolve(GGxx, psfy, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')
-	yGyy = convolve(GGyy, psfy, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')
+	xGtx = convolve(GGtx, psfx, mode='same')
+	xGty = convolve(GGty, psfx, mode='same')
+	
+	yGxx = convolve(GGxx, psfy, mode='same')
+	yGyy = convolve(GGyy, psfy, mode='same')
+	yGxy = convolve(GGxy, psfy, mode='same')
+	
+	yGtx = convolve(GGtx, psfy, mode='same')
+	yGty = convolve(GGty, psfy, mode='same')
+	
+	xxGxx = convolve(GGxx, psfxx, mode='same')
+	xxGxy = convolve(GGxy, psfxx, mode='same')
+	xxGyy = convolve(GGyy, psfxx, mode='same')
+	
+	xyGxx = convolve(GGxx, psfxy, mode='same')
+	xyGxy = convolve(GGxy, psfxy, mode='same')
+	xyGyy = convolve(GGyy, psfxy, mode='same')
+	
+	yyGxx = convolve(GGxx, psfyy, mode='same')
+	yyGxy = convolve(GGxy, psfyy, mode='same')
+	yyGyy = convolve(GGyy, psfyy, mode='same')
 
-	yGxy = convolve(GGxy, psfy, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')
-	yGtx = convolve(GGtx, psfy, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')
-	yGty = convolve(GGty, psfy, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')
-	xxGxx = convolve(GGxx, psfxx, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')
-
-	xxGxy = convolve(GGxy, psfxx, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')
-	xxGyy = convolve(GGyy, psfxx, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')
-	xyGxx = convolve(GGxx, psfxy, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')
-	xyGxy = convolve(GGxy, psfxy, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')
-
-	xyGyy = convolve(GGyy, psfxy, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')
-	yyGxx = convolve(GGxx, psfyy, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')
-	yyGxy = convolve(GGxy, psfyy, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')
-	yyGyy = convolve(GGyy, psfyy, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')
-
-	Gtt = convolve(GGtt, psf, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')
+	Gtt = convolve(GGtt, psf, mode='same')
 
 	Bxx = bx*bx
 	Byy = by*by
@@ -466,146 +474,141 @@ def the_matrix(bx, bxx, bxy, by, byx, byy, bz, bzx, bzy,
 	mbztbx = bzt*bx
 	mbztby = bzt*by
 
-	BxBx = convolve(Bxx, psf, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')
-	BxBy = convolve(Bxy, psf, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')
-	ByBy = convolve(Byy, psf, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')
-	BzBx = convolve(Bzx, psf, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')
+	BxBx = convolve(Bxx, psf, mode='same') #convolve(Bxx, psf, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')
+	BxBy = convolve(Bxy, psf, mode='same')
+	ByBy = convolve(Byy, psf, mode='same')
+	BzBx = convolve(Bzx, psf, mode='same')
+	BzBy = convolve(Bzy, psf, mode='same')
+
+	BxBxx = convolve(mbxbxx, psf, mode='same')
+	BxByy = convolve(mbxbyy, psf, mode='same')
+	ByBxx = convolve(mbybxx, psf, mode='same')  # b.11
+	ByByy = convolve(mbybyy, psf, mode='same')  # b.12
+	BzBxx = convolve(mbzbxx, psf, mode='same')  # b.13
+	BzByy = convolve(mbzbyy, psf, mode='same')  # b.14
+
+	BxxBxx = convolve(mbxxbxx, psf, mode='same')
+	ByyByy = convolve(mbyybyy, psf, mode='same')  # b.9
+	BxxByy = convolve(mbxxbyy, psf, mode='same')  # b.10
+
+	BztBx = convolve(mbztbx, psf, mode='same')  # b.25
+	BztBy = convolve(mbztby, psf, mode='same')  # b.26
+	BztBxx = convolve(mbztbxx, psf, mode='same')  # b.15
+	BztByy = convolve(mbztbyy, psf, mode='same')  # b.16
+
+	BzxBx = convolve(mbzxbx, psf, mode='same')  # b.17
+	BzxBy = convolve(mbzxby, psf, mode='same')  # b.18
+	BzxBxx = convolve(mbzxbxx, psf, mode='same')  # b.19
+	BzxByy = convolve(mbzxbyy, psf, mode='same')  # b.20
+
+	BzyBx = convolve(mbzybx, psf, mode='same')  # b.21
+	BzyBy = convolve(mbzyby, psf, mode='same')  # b.22
+	BzyBxx = convolve(mbzybxx, psf, mode='same')  # b.23
+	BzyByy = convolve(mbzybyy, psf, mode='same')  # b.24
+
+	xBzxBx = convolve(mbzxbx, psfx, mode='same')  # b.27
+	xBzxBy = convolve(mbzxby, psfx, mode='same')  # b.28
+	xBzyBx = convolve(mbzybx, psfx, mode='same')  # b.29
+	xBzyBy = convolve(mbzyby, psfx, mode='same')  # b.30
+	xByBxx = convolve(mbybxx, psfx, mode='same')  # b.39
+	xByByy = convolve(mbybyy, psfx, mode='same')  # b.40
+	xBxBxx = convolve(mbxbxx, psfx, mode='same')  # b.51
+	xBxByy = convolve(mbxbyy, psfx, mode='same')  # b.52
+	xBzBxx = convolve(mbzbxx, psfx, mode='same')  # b.53
+	xBzByy = convolve(mbzbyy, psfx, mode='same')  # b.54
+	xBzxBxx = convolve(mbzxbxx, psfx, mode='same')  # b.41
+	xBzxByy = convolve(mbzxbyy, psfx, mode='same')  # b.42
+	xBxxBxx = convolve(mbxxbxx, psfx, mode='same')  # b.45
+	xBxxByy = convolve(mbxxbyy, psfx, mode='same')  # b.46
+	xByyByy = convolve(mbyybyy, psfx, mode='same')  # b.47
+	xBztBxx = convolve(mbztbxx, psfx, mode='same')  # b.55
+	xBztByy = convolve(mbztbyy, psfx, mode='same')  # b.56
+	xBzyBxx = convolve(mbzybxx, psfx, mode='same')  # b.68
+	xBzyByy = convolve(mbzybyy, psfx, mode='same')  # b.69
+
+	yBzyBx = convolve(mbzybx, psfy, mode='same')  # b.31
+	yBzyBy = convolve(mbzyby, psfy, mode='same')  # b.32
+	yBzxBx = convolve(mbzxbx, psfy, mode='same')  # b.33
+	yBzxBy = convolve(mbzxby, psfy, mode='same')  # b.34
+	yBxBxx = convolve(mbxbxx, psfy, mode='same')  # b.35
+	yBxByy = convolve(mbxbyy, psfy, mode='same')  # b.36
+	yByBxx = convolve(mbybxx, psfy, mode='same')  # b.37
+	yByByy = convolve(mbybyy, psfy, mode='same')  # b.38
+	yBzBxx = convolve(mbzbxx, psfy, mode='same')  # b.66
+	yBzByy = convolve(mbzbyy, psfy, mode='same')  # b.67
+	yBzxBxx = convolve(mbzxbxx, psfy, mode='same')  # b.43
+	yBzxByy = convolve(mbzxbyy, psfy, mode='same')  # b.44
+	yBxxBxx = convolve(mbxxbxx, psfy, mode='same')  # b.48
+	yBxxByy = convolve(mbxxbyy, psfy, mode='same')  # b.49
+	yByyByy = convolve(mbyybyy, psfy, mode='same')  # b.50
+	yBztBxx = convolve(mbztbxx, psfy, mode='same')  # b.57
+	yBztByy = convolve(mbztbyy, psfy, mode='same')  # b.58
+	yBzyBxx = convolve(mbzybxx, psfy, mode='same')  # b.70
+	yBzyByy = convolve(mbzybyy, psfy, mode='same')  # b.71
+
+	xyBxxBxx = convolve(mbxxbxx, psfxy, mode='same')  # b.59
+	xyBxxByy = convolve(mbxxbyy, psfxy, mode='same')  # b.60
+	xyByyByy = convolve(mbyybyy, psfxy, mode='same')  # b.61
+	xyBzxBxx = convolve(mbzxbxx, psfxy, mode='same')  # b.62
+	xyBzxByy = convolve(mbzxbyy, psfxy, mode='same')  # b.63
+	xyBzyBxx = convolve(mbzybxx, psfxy, mode='same')  # b.64
+	xyBzyByy = convolve(mbzybyy, psfxy, mode='same')  # b.65
 	
-	BzBy = convolve(Bzy, psf, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')
-	BxBxx = convolve(mbxbxx, psf, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')
-	BxByy = convolve(mbxbyy, psf, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')
-	BxxBxx = convolve(mbxxbxx, psf, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')
-
-	ByyByy = convolve(mbyybyy, psf, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.9
-	BxxByy = convolve(mbxxbyy, psf, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.10
-	ByBxx = convolve(mbybxx, psf, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.11
-	ByByy = convolve(mbybyy, psf, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.12
-
-	BzBxx = convolve(mbzbxx, psf, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.13
-	BzByy = convolve(mbzbyy, psf, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.14
-	BztBxx = convolve(mbztbxx, psf, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.15
-	BztByy = convolve(mbztbyy, psf, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.16
-
-	BzxBx = convolve(mbzxbx, psf, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.17
-	BzxBy = convolve(mbzxby, psf, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.18
-	BzxBxx = convolve(mbzxbxx, psf, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.19
-	BzxByy = convolve(mbzxbyy, psf, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.20
-
-	BzyBx = convolve(mbzybx, psf, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.21
-	BzyBy = convolve(mbzyby, psf, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.22
-	BzyBxx = convolve(mbzybxx, psf, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.23
-	BzyByy = convolve(mbzybyy, psf, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.24
-
-	BztBx = convolve(mbztbx, psf, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.25
-	BztBy = convolve(mbztby, psf, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.26
-	xBzxBx = convolve(mbzxbx, psfx, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.27
-	xBzxBy = convolve(mbzxby, psfx, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.28
-
-	xBzyBx = convolve(mbzybx, psfx, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.29
-	xBzyBy = convolve(mbzyby, psfx, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.30
-	yBzyBx = convolve(mbzybx, psfy, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.31
-	yBzyBy = convolve(mbzyby, psfy, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.32
-
-	yBzxBx = convolve(mbzxbx, psfy, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.33
-	yBzxBy = convolve(mbzxby, psfy, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.34
-	yBxBxx = convolve(mbxbxx, psfy, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.35
-	yBxByy = convolve(mbxbyy, psfy, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.36
-
-	yByBxx = convolve(mbybxx, psfy, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.37
-	yByByy = convolve(mbybyy, psfy, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.38
-	xByBxx = convolve(mbybxx, psfx, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.39
-	xByByy = convolve(mbybyy, psfx, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.40
-
-	xBzxBxx = convolve(mbzxbxx, psfx, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.41
-	xBzxByy = convolve(mbzxbyy, psfx, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.42
-	yBzxBxx = convolve(mbzxbxx, psfy, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.43
-	yBzxByy = convolve(mbzxbyy, psfy, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.44
-
-	xBxxBxx = convolve(mbxxbxx, psfx, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.45
-	xBxxByy = convolve(mbxxbyy, psfx, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.46
-	xByyByy = convolve(mbyybyy, psfx, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.47
-	yBxxBxx = convolve(mbxxbxx, psfy, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.48
-
-	yBxxByy = convolve(mbxxbyy, psfy, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.49
-	yByyByy = convolve(mbyybyy, psfy, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.50
-	xBxBxx = convolve(mbxbxx, psfx, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.51
-	xBxByy = convolve(mbxbyy, psfx, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.52
-
-	xBzBxx = convolve(mbzbxx, psfx, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.53
-	xBzByy = convolve(mbzbyy, psfx, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.54
-	xBztBxx = convolve(mbztbxx, psfx, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.55
-	xBztByy = convolve(mbztbyy, psfx, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.56
-
-	yBztBxx = convolve(mbztbxx, psfy, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.57
-	yBztByy = convolve(mbztbyy, psfy, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.58
-	xyBxxBxx = convolve(mbxxbxx, psfxy, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.59
-	xyBxxByy = convolve(mbxxbyy, psfxy, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.60
-
-	xyByyByy = convolve(mbyybyy, psfxy, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.61
-	xyBzxBxx = convolve(mbzxbxx, psfxy, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.62
-	xyBzxByy = convolve(mbzxbyy, psfxy, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.63
-	xyBzyBxx = convolve(mbzybxx, psfxy, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.64
-
-	xyBzyByy = convolve(mbzybyy, psfxy, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.65
-	yBzBxx = convolve(mbzbxx, psfy, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.66
-	yBzByy = convolve(mbzbyy, psfy, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.67
-	xBzyBxx = convolve(mbzybxx, psfx, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.68
-
-	xBzyByy = convolve(mbzybyy, psfx, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.69
-	yBzyBxx = convolve(mbzybxx, psfy, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.70
-	yBzyByy = convolve(mbzybyy, psfy, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.71
-	xxBxxBxx = convolve(mbxxbxx, psfxx, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.72
-
-	xxBxxByy = convolve(mbxxbyy, psfxx, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.73
-	xxByyByy = convolve(mbyybyy, psfxx, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.74
-	xxBzxBxx = convolve(mbzxbxx, psfxx, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.75
-	xxBzyBxx = convolve(mbzybxx, psfxx, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.76
-
-	xxBzxByy = convolve(mbzxbyy, psfxx, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.77
-	xxBzyByy = convolve(mbzybyy, psfxx, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.78
-	yyBxxBxx = convolve(mbxxbxx, psfyy, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.79
-	yyBxxByy = convolve(mbxxbyy, psfyy, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.80
-
-	yyByyByy = convolve(mbyybyy, psfyy, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.81
-	yyBzyBxx = convolve(mbzybxx, psfyy, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.82
-	yyBzyByy = convolve(mbzybyy, psfyy, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.83
-	yyBzxBxx = convolve(mbzxbxx, psfyy, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.84
-
-	yyBzxByy = convolve(mbzxbyy, psfyy, normalize_kernel=False, preserve_nan=True, nan_treatment='fill')  # b.85
+	xxBxxBxx = convolve(mbxxbxx, psfxx, mode='same')  # b.72
+	xxBxxByy = convolve(mbxxbyy, psfxx, mode='same')  # b.73
+	xxByyByy = convolve(mbyybyy, psfxx, mode='same')  # b.74
+	xxBzxBxx = convolve(mbzxbxx, psfxx, mode='same')  # b.75
+	xxBzyBxx = convolve(mbzybxx, psfxx, mode='same')  # b.76
+	xxBzxByy = convolve(mbzxbyy, psfxx, mode='same')  # b.77
+	xxBzyByy = convolve(mbzybyy, psfxx, mode='same')  # b.78
+	
+	yyBxxBxx = convolve(mbxxbxx, psfyy, mode='same')  # b.79
+	yyBxxByy = convolve(mbxxbyy, psfyy, mode='same')  # b.80
+	yyByyByy = convolve(mbyybyy, psfyy, mode='same')  # b.81
+	yyBzyBxx = convolve(mbzybxx, psfyy, mode='same')  # b.82
+	yyBzyByy = convolve(mbzybyy, psfyy, mode='same')  # b.83
+	yyBzxBxx = convolve(mbzxbxx, psfyy, mode='same')  # b.84
+	yyBzxByy = convolve(mbzxbyy, psfyy, mode='same')  # b.85
 
 
 	A = np.stack([
-		Gxx, Gxy, Gx + xGxx, Gx + yGxy, yGxx, xGxy, -BzxBxx - BzxByy, -BzxBx - xBzxBxx - xBzxByy,
-		-BzxBy - yBzxBxx - yBzxByy, Gtx, Gxy, Gyy, Gy + xGxy, Gy + yGyy, yGxy, xGyy, -BzyBxx - BzyByy,
-		-BzyBx - xBzyBxx - xBzyByy, -BzyBy - yBzyBxx - yBzyByy, Gty, Gx + xGxx, Gy + xGxy,
-		G + 2 * xGx + xxGxx, G + xGx + xyGxy + yGy, xyGxx + yGx, xGy + xxGxy,
-		-BzBxx - BzByy - xBzxBxx - xBzxByy, -BzBx - xBzBxx - xBzByy - xBzxBx - xxBzxBxx - xxBzxByy,
-		-BzBy - xBzxBy - xyBzxBxx - xyBzxByy - yBzBxx - yBzByy, Ht + xGtx, Gx + yGxy, Gy + yGyy,
-		G + xGx + xyGxy + yGy, G + 2 * yGy + yyGyy, yGx + yyGxy, xGy + xyGyy,
-		-BzBxx - BzByy - yBzyBxx - yBzyByy, -BzBx - xBzBxx - xBzByy - xyBzyBxx - xyBzyByy - yBzyBx,
-		-BzBy - yBzBxx - yBzByy - yBzyBy - yyBzyBxx - yyBzyByy, Ht + yGty, yGxx, yGxy, xyGxx + yGx,
-		yGx + yyGxy, yyGxx, xyGxy, -yBzxBxx - yBzxByy, -xyBzxBxx - xyBzxByy - yBzxBx,
-		-yBzxBy - yyBzxBxx - yyBzxByy, yGtx, xGxy, xGyy, xGy + xxGxy, xGy + xyGyy, xyGxy, xxGyy,
-		-xBzyBxx - xBzyByy, -xBzyBx - xxBzyBxx - xxBzyByy, -xBzyBy - xyBzyBxx - xyBzyByy, xGty,
-		-BzxBxx - BzxByy, -BzyBxx - BzyByy, -BzBxx - BzByy - xBzxBxx - xBzxByy,
-		-BzBxx - BzByy - yBzyBxx - yBzyByy, -yBzxBxx - yBzxByy, -xBzyBxx - xBzyByy,
-		BxxBxx + 2 * BxxByy + ByyByy, BxBxx + BxByy + xBxxBxx + 2 * xBxxByy + xByyByy,
-		ByBxx + ByByy + yBxxBxx + 2 * yBxxByy + yByyByy, -BztBxx - BztByy, -BzxBx - xBzxBxx - xBzxByy,
-		-BzyBx - xBzyBxx - xBzyByy, -BzBx - xBzBxx - xBzByy - xBzxBx - xxBzxBxx - xxBzxByy,
-		-BzBx - xBzBxx - xBzByy - xyBzyBxx - xyBzyByy - yBzyBx,
-		-xyBzxBxx - xyBzxByy - yBzxBx, -xBzyBx - xxBzyBxx - xxBzyByy,
-		BxBxx + BxByy + xBxxBxx + 2 * xBxxByy + xByyByy,
-		BxBx + 2 * xBxBxx + 2 * xBxByy + xxBxxBxx + 2 * xxBxxByy + xxByyByy,
-		BxBy + xByBxx + xByByy + xyBxxBxx + 2 * xyBxxByy + xyByyByy + yBxBxx + yBxByy,
-		-BztBx - xBztBxx - xBztByy, -BzxBy - yBzxBxx - yBzxByy, -BzyBy - yBzyBxx - yBzyByy,
-		-BzBy - xBzxBy - xyBzxBxx - xyBzxByy - yBzBxx - yBzByy,
-		-BzBy - yBzBxx - yBzByy - yBzyBy - yyBzyBxx - yyBzyByy,
-		-yBzxBy - yyBzxBxx - yyBzxByy, -xBzyBy - xyBzyBxx - xyBzyByy,
-		ByBxx + ByByy + yBxxBxx + 2 * yBxxByy + yByyByy,
-		BxBy + xByBxx + xByByy + xyBxxBxx + 2 * xyBxxByy + xyByyByy + yBxBxx + yBxByy,
-		ByBy + 2 * yByBxx + 2 * yByByy + yyBxxBxx + 2 * yyBxxByy + yyByyByy, -BztBy - yBztBxx - yBztByy,
-		Gtx, Gty, Ht + xGtx, Ht + yGty, yGtx, xGty, -BztBxx - BztByy, -BztBx - xBztBxx - xBztByy,
-		-BztBy - yBztBxx - yBztByy, Gtt
+		Gxx, Gxy, Gx + xGxx, Gx + yGxy, yGxx, xGxy, -BzxBxx - BzxByy, 
+  -BzxBx - xBzxBxx - xBzxByy, -BzxBy - yBzxBxx - yBzxByy, Gtx, 
+ Gxy, Gyy, Gy + xGxy, Gy + yGyy, yGxy, xGyy, -BzyBxx - BzyByy, 
+  -BzyBx - xBzyBxx - xBzyByy, -BzyBy - yBzyBxx - yBzyByy, Gty, 
+ Gx + xGxx, Gy + xGxy, G + 2*xGx + xxGxx, G + xGx + xyGxy + yGy,
+  xyGxx + yGx, xGy + xxGxy, -BzBxx - BzByy - xBzxBxx - xBzxByy, 
+  -BzBx - xBzBxx - xBzByy - xBzxBx - xxBzxBxx - xxBzxByy, 
+  -BzBy - xBzxBy - xyBzxBxx - xyBzxByy - yBzBxx - yBzByy, Ht + xGtx, 
+ Gx + yGxy, Gy + yGyy, G + xGx + xyGxy + yGy, G + 2*yGy + yyGyy, 
+  yGx + yyGxy, xGy + xyGyy, -BzBxx - BzByy - yBzyBxx - yBzyByy, 
+  -BzBx - xBzBxx - xBzByy - xyBzyBxx - xyBzyByy - yBzyBx, 
+  -BzBy - yBzBxx - yBzByy - yBzyBy - yyBzyBxx - yyBzyByy, Ht + yGty, 
+ yGxx, yGxy, xyGxx + yGx, yGx + yyGxy, yyGxx, xyGxy, -yBzxBxx - yBzxByy, 
+  -xyBzxBxx - xyBzxByy - yBzxBx, -yBzxBy - yyBzxBxx - yyBzxByy, yGtx, 
+ xGxy, xGyy, xGy + xxGxy, xGy + xyGyy, xyGxy, xxGyy, -xBzyBxx - xBzyByy, 
+  -xBzyBx - xxBzyBxx - xxBzyByy, -xBzyBy - xyBzyBxx - xyBzyByy, xGty, 
+ -BzxBxx - BzxByy, -BzyBxx - BzyByy, -BzBxx - BzByy - xBzxBxx - xBzxByy, 
+  -BzBxx - BzByy - yBzyBxx - yBzyByy, -yBzxBxx - yBzxByy, -xBzyBxx - xBzyByy, 
+  BxxBxx + 2*BxxByy + ByyByy, BxBxx + BxByy + xBxxBxx + 2*xBxxByy + xByyByy,
+  ByBxx + ByByy + yBxxBxx + 2*yBxxByy + yByyByy, -BztBxx - BztByy, 
+ -BzxBx - xBzxBxx - xBzxByy, -BzyBx - xBzyBxx - xBzyByy, 
+  -BzBx - xBzBxx - xBzByy - xBzxBx - xxBzxBxx - xxBzxByy, 
+  -BzBx - xBzBxx - xBzByy - xyBzyBxx - xyBzyByy - yBzyBx, 
+  -xyBzxBxx - xyBzxByy - yBzxBx, -xBzyBx - xxBzyBxx - xxBzyByy,
+  BxBxx + BxByy + xBxxBxx + 2*xBxxByy + xByyByy, 
+  BxBx + 2*xBxBxx + 2*xBxByy + xxBxxBxx + 2*xxBxxByy + xxByyByy, 
+  BxBy + xByBxx + xByByy + xyBxxBxx + 2*xyBxxByy + xyByyByy + yBxBxx + yBxByy, 
+  -BztBx - xBztBxx - xBztByy, -BzxBy - yBzxBxx - yBzxByy, 
+  -BzyBy - yBzyBxx - yBzyByy, -BzBy - xBzxBy - xyBzxBxx - xyBzxByy - yBzBxx - yBzByy, 
+  -BzBy - yBzBxx - yBzByy - yBzyBy - yyBzyBxx - yyBzyByy, 
+  -yBzxBy - yyBzxBxx - yyBzxByy, -xBzyBy - xyBzyBxx - xyBzyByy, 
+  ByBxx + ByByy + yBxxBxx + 2*yBxxByy + yByyByy,
+  BxBy + xByBxx + xByByy + xyBxxBxx + 2*xyBxxByy + xyByyByy + yBxBxx + yBxByy, 
+  ByBy + 2*yByBxx + 2*yByByy + yyBxxBxx + 2*yyBxxByy + yyByyByy, 
+  -BztBy - yBztBxx - yBztByy, Gtx, Gty, Ht + xGtx, Ht + yGty, yGtx, xGty, 
+  -BztBxx - BztByy, -BztBx - xBztBxx - xBztByy, -BztBy - yBztBxx - yBztByy,
+  Gtt
 	], axis=0)
 
 	return A
@@ -675,3 +678,79 @@ def _velocity_gradients(vx, vy):
 	du_y, du_x = np.gradient(vx)
 	dv_y, dv_x = np.gradient(vy)
 	return du_x, du_y, dv_x, dv_y
+
+
+def fft_convolve2d(data, kernel):
+	"""Fast 2D convolution via FFT (no scipy.signal dependency).
+
+	The kernel is zero-padded to the image size, both are FFT'd,
+	multiplied, and inverse-FFT'd.  The result is equivalent to
+	``scipy.ndimage.correlate(data, kernel)`` for symmetric kernels
+	(Gaussians are symmetric).
+
+	Parameters
+	----------
+	data : 2D ndarray
+		Input image.
+	kernel : 2D ndarray
+		Convolution kernel (should be smaller than ``data``).
+
+	Returns
+	-------
+	result : 2D ndarray, same shape as ``data``
+	"""
+	ny, nx = data.shape
+	ky, kx = kernel.shape
+	# Pad to avoid wrap-around artefacts
+	py, px = ny + ky - 1, nx + kx - 1
+	# Round up to efficient FFT size (power-of-2 not required by scipy.fft
+	# but next_fast_len helps)
+	try:
+		from scipy.fft import next_fast_len
+		py = next_fast_len(py)
+		px = next_fast_len(px)
+	except ImportError:
+		pass
+
+	data_fft = fft2(data, s=(py, px))
+	kern_fft = fft2(kernel, s=(py, px))
+	out = np.real(ifft2(data_fft * kern_fft))
+
+	# Crop to original size, centred
+	cy, cx = (ky - 1) // 2, (kx - 1) // 2
+	return out[cy:cy + ny, cx:cx + nx]
+
+
+def fft_convolve2d_precomputed(data_fft, kernel, pad_shape, output_shape, kernel_centre=None):
+	"""FFT convolution reusing a pre-computed image FFT.
+
+	Avoids recomputing the (expensive) forward FFT of the image when the
+	same image is convolved with many different kernels.
+
+	Parameters
+	----------
+	data_fft : 2D complex ndarray
+		Pre-computed ``fft2(data, s=pad_shape)``.
+	kernel : 2D ndarray
+		Convolution kernel.
+	pad_shape : tuple (py, px)
+		Padded FFT shape used when computing ``data_fft``.
+	output_shape : tuple (ny, nx)
+		Original (unpadded) image shape.
+	kernel_centre : tuple (cy, cx) or None
+		Centre of the kernel for cropping.  If None, uses
+		``((ky-1)//2, (kx-1)//2)``.
+
+	Returns
+	-------
+	result : 2D ndarray of shape ``output_shape``
+	"""
+	kern_fft = fft2(kernel, s=pad_shape)
+	out = np.real(ifft2(data_fft * kern_fft))
+	ky, kx = kernel.shape
+	if kernel_centre is None:
+		cy, cx = (ky - 1) // 2, (kx - 1) // 2
+	else:
+		cy, cx = kernel_centre
+	ny, nx = output_shape
+	return out[cy:cy + ny, cx:cx + nx]

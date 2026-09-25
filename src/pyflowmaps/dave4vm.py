@@ -13,11 +13,16 @@ Units
 - Output velocities (`U0`, `V0`, `W0`) in km/s; local coefficients (`UX`, `UY`, `VX`, `VY`, `WX`, `WY`).
 """
 
+import warnings
 import numpy as np
 from .math_tools import the_matrix
+from scipy.linalg import lstsq
 
 
-def pydave4vm(magnetic_vector,window_size,dx,dy):
+_REQUIRED_KEYS = {'bx', 'by', 'bz', 'bxx', 'bxy', 'byx', 'byy', 'bzx', 'bzy', 'bzt'}
+
+
+def pydave4vm(magnetic_vector,window_size):
 	"""Core DAVE4VM solver producing local coefficients over pixels.
 
 	Parameters
@@ -26,14 +31,36 @@ def pydave4vm(magnetic_vector,window_size,dx,dy):
 		Keys: 'bx','by','bz','bxx','bxy','byx','byy','bzx','bzy','bzt'. Arrays shape (ny, nx).
 	window_size : int
 		Odd window size in pixels for local averaging/inversion.
-	dx, dy : float
-		Pixel scales in km/pixel.
 
 	Returns
 	-------
 	dict
 		Velocity components and local coefficients over the input grid.
 	"""
+	# --- Input validation ---
+	missing = _REQUIRED_KEYS - set(magnetic_vector.keys())
+	if missing:
+		raise ValueError('magnetic_vector is missing required keys: {}'.format(sorted(missing)))
+
+	ref_shape = magnetic_vector['bz'].shape
+	for key in _REQUIRED_KEYS:
+		if magnetic_vector[key].shape != ref_shape:
+			raise ValueError(
+				'Shape mismatch: magnetic_vector[\'{}\'] has shape {}, expected {}'.format(
+					key, magnetic_vector[key].shape, ref_shape))
+
+	dx = magnetic_vector['dx']
+	dy = magnetic_vector['dy']
+
+	if dx <= 0 or dy <= 0:
+		raise ValueError('dx and dy must be positive, got dx={}, dy={}'.format(dx, dy))
+
+	if not isinstance(window_size, (int, np.integer)) or window_size < 1:
+		raise ValueError('window_size must be a positive integer, got {}'.format(window_size))
+	if window_size % 2 == 0:
+		warnings.warn('window_size should be odd for symmetric averaging; got {}. Adding 1.'.format(window_size))
+		window_size += 1
+
 	U0 = np.zeros_like(magnetic_vector['bz'], dtype='float32')
 	V0 = np.zeros_like(magnetic_vector['bz'], dtype='float32')
 	UX = np.zeros_like(magnetic_vector['bz'], dtype='float32')
@@ -61,15 +88,21 @@ def pydave4vm(magnetic_vector,window_size,dx,dy):
 					psf, psfx, psfy, psfxx, psfyy, psfxy)
 
 	AM = np.reshape(AM, (10, 10, *magnetic_vector['bz'].shape))
+
 	trc = np.trace(AM)
 
 	yi, xi = np.where(trc > 1.0)
 
 	for j, i in zip(yi, xi):
-		AA = AM[:, :, j, i]
-		GA = AA[0:9, 0:9]
-		FA = -1 * np.reshape(AA[9, 0:9], 9)
-		vector = np.linalg.solve(GA, FA)
+		#AA = AM[:, :, j, i]
+		GA = AM[0:9, 0:9,j,i]
+		FA = -1 * AM[9, 0:9,j,i]
+		try:
+			vector = np.linalg.solve(GA, FA)
+		except np.linalg.LinAlgError:
+			vector = lstsq(GA, FA, lapack_driver='gelsy')[0]
+
+			
 		U0[j, i] = vector[0]
 		V0[j, i] = vector[1]
 		UX[j, i] = vector[2]
